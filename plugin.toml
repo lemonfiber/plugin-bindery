@@ -1,0 +1,61 @@
+schema_version = 1
+
+[plugin]
+id          = "bindery"
+name        = "Bindery"
+version     = "1.0.0"
+description = "Watches for books and audiobooks and fetches them"
+without_it  = "No book automation (Readarr is discontinued)"
+upstream    = "https://github.com/vavallee/bindery"
+license     = "MIT"
+forms       = ["books", "auto", "full"]
+
+[[service]]
+id          = "bindery"
+name        = "Bindery"
+image       = "ghcr.io/vavallee/bindery"
+digest      = "sha256:3dc411e335c239f15f162648a5b32db1c7b5b0e32cef5e811b6efb1be963fd80"
+tag         = "v1.40.0"
+port        = 8787
+bind        = "loopback"
+listens     = 8787
+health      = { kind = "http", path = "/", timeout_s = 90 }
+criticality = "core"
+memory_mib  = 150
+reaches     = "book and audiobook metadata providers"
+asks_for    = "Reads author, title and cover information for the books it watches for."
+provides    = ["library.curate"]
+api         = { kind = "bindery", key_source = "generated" }
+takes_data  = true
+user_mode   = "uid"
+media_types = ["books"]
+replaces    = "bindery"
+
+[service.env]
+BINDERY_LIBRARY_DIR   = "/data/media/books"
+BINDERY_AUDIOBOOK_DIR = "/data/media/audiobooks"
+BINDERY_DOWNLOAD_DIR  = "/data/downloads"
+
+[[ask]]
+capability = "download.usenet"
+
+[[ask]]
+capability = "download.torrent"
+
+[[ask]]
+capability = "indexer.search"
+
+[[claim]]
+capability = "library.curate"
+
+[[claim.probe]]
+id      = "guarded"
+request = { method = "GET", path = "/api/v1/wanted/missing" }
+expect  = { status = 401 }
+fixture = "recordings/bindery/library-curate-guarded.json"
+
+[[claim.probe]]
+id      = "wanted"
+request = { method = "GET", path = "/api/v1/wanted/missing" }
+expect  = { status = 200, json_array_min = 0 }
+fixture = "recordings/bindery/library-curate-wanted.json"
