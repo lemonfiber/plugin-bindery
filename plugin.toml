@@ -35,6 +35,12 @@ replaces    = "bindery"
 BINDERY_LIBRARY_DIR   = "/data/media/books"
 BINDERY_AUDIOBOOK_DIR = "/data/media/audiobooks"
 BINDERY_DOWNLOAD_DIR  = "/data/downloads"
+BINDERY_API_KEY       = { secret = "api-key" }
+
+[[secret]]
+id  = "api-key"
+of  = "bindery"
+why = "The key lemonfiber mints and Bindery adopts, so both know it without reading its database"
 
 [[ask]]
 capability = "download.usenet"
