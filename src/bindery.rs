@@ -117,5 +117,13 @@ impl Bindery {
     }
 }
 
+/// What Bindery cannot do, answered as an operation it does not offer.
+fn unsupported(detail: &str) -> Failure {
+    Failure::Unsupported {
+        service: SERVICE.to_owned(),
+        detail: detail.to_owned(),
+    }
+}
+
 #[cfg(test)]
 mod tests;

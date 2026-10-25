@@ -1,0 +1,17 @@
+{
+  "recorded_from": "ghcr.io/vavallee/bindery@sha256:27109c963f91a27f08d8825b406b2b5a5c59aed080bd9f3a7e585e235673d489",
+  "note": "The download client just registered, by id, address and the category it files under.",
+  "request": {"method": "POST", "path": "/lemonfiber/library.curate/v1/download_clients", "accept": "application/json"},
+  "response": {
+    "status": 200,
+    "headers": {"content-type": "application/json"},
+    "json": [
+      {
+        "category": {"field": "category", "value": "conformance"},
+        "host": "conformance-download",
+        "id": "1",
+        "port": 8080
+      }
+    ]
+  }
+}

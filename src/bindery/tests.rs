@@ -133,13 +133,13 @@ async fn a_prowlarr_is_added_with_its_key_to_be_read_on_every_start() {
 }
 
 #[tokio::test]
-async fn an_aggregator_in_any_other_api_than_prowlarr_s_is_refused_before_bindery_is_asked() {
+async fn an_aggregator_in_any_other_api_than_prowlarr_s_is_unsupported_and_bindery_is_not_asked() {
     let fake = Fake::silent();
     assert!(matches!(
         bindery(&fake)
             .add_aggregator(&aggregator("nzbhydra2"))
             .await,
-        Err(Failure::Refused { .. })
+        Err(Failure::Unsupported { service, .. }) if service == "bindery"
     ));
     assert!(fake.requests().is_empty());
 }

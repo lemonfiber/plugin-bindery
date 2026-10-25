@@ -5,7 +5,7 @@ use lemonfiber_ports::http::Method;
 use lemonfiber_ports::service::{AggregatorAt, Failure, KnownAggregator, PullsIndexers};
 use serde::Deserialize;
 
-use super::Bindery;
+use super::{unsupported, Bindery};
 
 const INSTANCES: &str = "/prowlarr";
 
@@ -45,7 +45,7 @@ impl PullsIndexers for Bindery {
 
     async fn add_aggregator(&self, aggregator: &AggregatorAt) -> Result<(), Failure> {
         if aggregator.protocol.0 != READS_SERVARR {
-            return Err(self.endpoint.refused(ONLY_PROWLARR));
+            return Err(unsupported(ONLY_PROWLARR));
         }
         let body = serde_json::json!({
             "name": aggregator.name,

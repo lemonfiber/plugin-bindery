@@ -14,7 +14,7 @@ use lemonfiber_ports::service::{
 use lemonfiber_ports::Client;
 use serde::Deserialize;
 
-use super::{Bindery, SERVICE};
+use super::{unsupported, Bindery};
 use crate::adapter::UPSTREAM;
 
 const STATUS: &str = "/system/status";
@@ -115,13 +115,6 @@ struct Downloads {
 struct Probed {
     #[serde(default)]
     error: Option<String>,
-}
-
-fn unsupported(detail: &str) -> Failure {
-    Failure::Unsupported {
-        service: SERVICE.to_owned(),
-        detail: detail.to_owned(),
-    }
 }
 
 fn tracking(state: &str) -> &'static str {
