@@ -24,8 +24,6 @@ criticality = "core"
 memory_mib  = 150
 reaches     = "book and audiobook metadata providers"
 asks_for    = "Reads author, title and cover information for the books it watches for."
-provides    = ["library.curate"]
-api         = { kind = "bindery", key_source = "generated" }
 takes_data  = true
 user_mode   = "uid"
 media_types = ["books"]
@@ -37,31 +35,62 @@ BINDERY_AUDIOBOOK_DIR = "/data/media/audiobooks"
 BINDERY_DOWNLOAD_DIR  = "/data/downloads"
 BINDERY_API_KEY       = { secret = "api-key" }
 
+[[service]]
+id          = "bindery-adapter"
+name        = "Bindery adapter"
+image       = "ghcr.io/lemonfiber/bindery-adapter"
+digest      = "sha256:631f90902ce31c69054864329f6481dea612519658e620b9afda2533dbe21f87"
+tag         = "main-1a7de5225745"
+criticality = "core"
+reaches     = ""
+asks_for    = "Nothing beyond this machine. It answers lemonfiber's owner.claim, indexer.pull and library.curate contracts by calling Bindery, beside it, with the key and the administrator lemonfiber minted for it."
+config_path = "/config"
+listens     = 8080
+speaks      = ["owner.claim@1", "indexer.pull@1", "library.curate@1"]
+fronts      = "bindery"
+provides    = ["library.curate"]
+upstream    = { api_key = { secret = "api-key" }, username = { secret = "admin-username" }, password = { secret = "admin-password" } }
+
 [[secret]]
-id  = "api-key"
-of  = "bindery"
-why = "The key lemonfiber mints and Bindery adopts, so both know it without reading its database"
+id     = "api-key"
+of     = "bindery"
+minted = true
+why    = "The key lemonfiber mints and Bindery adopts, which the adapter in front of it presents"
+
+[[secret]]
+id     = "admin-username"
+of     = "bindery"
+minted = true
+why    = "The name of the first account Bindery is claimed for, which the adapter signs in as"
+
+[[secret]]
+id     = "admin-password"
+of     = "bindery"
+minted = true
+why    = "The password of the first account Bindery is claimed for, which the adapter signs in with"
+
+[[proof]]
+id      = "bindery.guarded"
+service = "bindery"
+title   = "Bindery shows what it is watching for to nobody presenting nothing"
+fixture = "recordings/bindery/wanted-guarded.json"
+why     = """
+A curator holds every key the stack gave it and can be made to download
+anything. Only the adapter asks it, with the key lemonfiber minted, so a Bindery
+that answered its wanted list to a caller presenting nothing would be answering
+every device that can reach it.
+"""
+request = { method = "GET", path = "/api/v1/wanted/missing" }
+expect  = { status = 401, json = { error = "unauthorized" } }
 
 [[ask]]
+service    = "bindery"
 capability = "download.usenet"
 
 [[ask]]
+service    = "bindery"
 capability = "download.torrent"
 
 [[ask]]
+service    = "bindery"
 capability = "indexer.search"
-
-[[claim]]
-capability = "library.curate"
-
-[[claim.probe]]
-id      = "guarded"
-request = { method = "GET", path = "/api/v1/wanted/missing" }
-expect  = { status = 401 }
-fixture = "recordings/bindery/library-curate-guarded.json"
-
-[[claim.probe]]
-id      = "wanted"
-request = { method = "GET", path = "/api/v1/wanted/missing" }
-expect  = { status = 200, json_array_min = 0 }
-fixture = "recordings/bindery/library-curate-wanted.json"

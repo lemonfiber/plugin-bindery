@@ -17,14 +17,14 @@ image the `Dockerfile` builds. `release.yml` publishes that image from every
 commit on `main` and from the train's tag. The
 [bundle contract](https://github.com/lemonfiber/spec/blob/main/20-architecture/contracts/bundle.md)
 says how the catalogue pins this repository and how lemonfiber carries it.
-`plugin.toml` does not name the adapter yet: the part is one service with the
-in-process adapter its `api` names.
+`plugin.toml` runs Bindery beside the adapter, `bindery-adapter`, which `fronts`
+it, and the conformance recordings under `conformance/` are the adapter's answers.
 
 ## The rules you cannot break
 
 - **The plugin id is the service's id** (`ARCH-R266`). The container, the
   configuration directory, the settings and the journal keep their names.
-- **Its claims' recordings sit under `recordings/bindery/`**, and its starting
+- **Its proofs' recordings sit under `recordings/bindery/`**, and its starting
   files under `config/bindery/` (`ARCH-R271`).
 - **Every service declares `reaches` and `asks_for`** (`ARCH-R270`).
 - **The reader is spec's `first-party-plugin` workflow's,** and lemonfiber

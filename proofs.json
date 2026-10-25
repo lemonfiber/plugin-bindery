@@ -1,16 +1,10 @@
 {
-  "lemonfiber": "e53e019495ceef10332794dc2c2ed718ef1eb5fa",
+  "lemonfiber": "733a12fc8ca8bfaa654cb7fa0fe1538bde1f502c",
   "against": "recordings",
   "proofs": [
     {
-      "id": "library.curate/guarded",
-      "kind": "probe",
-      "outcome": "passed",
-      "detail": ""
-    },
-    {
-      "id": "library.curate/wanted",
-      "kind": "probe",
+      "id": "bindery.guarded",
+      "kind": "proof",
       "outcome": "passed",
       "detail": ""
     }

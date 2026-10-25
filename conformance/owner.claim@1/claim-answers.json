@@ -1,0 +1,10 @@
+{
+  "recorded_from": "ghcr.io/vavallee/bindery@sha256:27109c963f91a27f08d8825b406b2b5a5c59aed080bd9f3a7e585e235673d489",
+  "note": "The first claim of a fresh Bindery: its first-run setup makes the minted administrator, so the part is ours at once.",
+  "request": {"method": "POST", "path": "/lemonfiber/owner.claim/v1/claim", "accept": "application/json"},
+  "response": {
+    "status": 200,
+    "headers": {"content-type": "application/json"},
+    "json": "ours"
+  }
+}

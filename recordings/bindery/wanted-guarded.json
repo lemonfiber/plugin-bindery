@@ -1,0 +1,10 @@
+{
+  "recorded_from": "ghcr.io/vavallee/bindery@sha256:27109c963f91a27f08d8825b406b2b5a5c59aed080bd9f3a7e585e235673d489",
+  "note": "The wanted list, asked for presenting nothing on an instance the adapter has claimed. A refusal is the pass: a curator holds every key the stack gave it and can be made to download anything.",
+  "request": {"method": "GET", "path": "/api/v1/wanted/missing"},
+  "response": {
+    "status": 401,
+    "headers": {"content-type": "application/json"},
+    "json": {"error": "unauthorized"}
+  }
+}
