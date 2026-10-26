@@ -1,0 +1,10 @@
+{
+  "recorded_from": "ghcr.io/vavallee/bindery@sha256:27109c963f91a27f08d8825b406b2b5a5c59aed080bd9f3a7e585e235673d489",
+  "note": "Whether a fresh Bindery wants anything, read from its wanted list without searching: it wants nothing.",
+  "request": {"method": "POST", "path": "/lemonfiber/library.curate/v1/wanting", "accept": "application/json"},
+  "response": {
+    "status": 200,
+    "headers": {"content-type": "application/json"},
+    "json": false
+  }
+}
