@@ -29,6 +29,8 @@ const INDEXERS: &str = "/indexer";
 
 const QUEUE: &str = "/queue";
 
+const WANTED: &str = "/wanted/missing";
+
 const CATEGORY: &str = "category";
 
 const AUDIOBOOK_CATEGORY: &str = "categoryAudiobook";
@@ -335,6 +337,13 @@ impl Catalogue for Bindery {
 impl Maintenance for Bindery {
     async fn search_upgrades(&self, _kind: Kind) -> Result<(), Failure> {
         Err(unsupported(BOOKS_ALONE))
+    }
+
+    async fn wanting(&self) -> Result<bool, Failure> {
+        let wanted: Vec<serde_json::Value> = self
+            .read(WANTED, "the wanted list could not be read")
+            .await?;
+        Ok(!wanted.is_empty())
     }
 }
 

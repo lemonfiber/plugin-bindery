@@ -1,8 +1,9 @@
 use lemonfiber_fixtures::http::{Answer, Fake};
 use lemonfiber_ports::http::Method;
 use lemonfiber_ports::service::{
-    Catalogue as _, Category, ClientProbe, Credential, DownloadClient, Failure, Identity, Protocol,
-    QualityProfile, Queue, Queued, Queues as _, RegisteredClient, RegisteredFolder, RootFolder,
+    Catalogue as _, Category, ClientProbe, Credential, DownloadClient, Failure, Identity,
+    Maintenance as _, Protocol, QualityProfile, Queue, Queued, Queues as _, RegisteredClient,
+    RegisteredFolder, RootFolder,
 };
 use lemonfiber_ports::Client as _;
 
@@ -329,4 +330,21 @@ async fn the_queue_is_answered_in_bindery_s_words_with_what_stopped_marked() {
     );
     let empty = Fake::always(Answer::reply(200, "{}"));
     assert_eq!(bindery(&empty).queue().await.ok(), Some(Queue::default()));
+}
+
+#[tokio::test]
+async fn it_is_wanting_while_its_wanted_list_holds_a_book_and_searches_nothing() {
+    let fake = Fake::always(Answer::reply(200, r#"[{"id":3,"title":"A Book"}]"#));
+    assert_eq!(bindery(&fake).wanting().await.ok(), Some(true));
+    assert_eq!(
+        asked(&fake),
+        [(Method::Get, "/api/v1/wanted/missing".to_owned(), None)]
+    );
+    let empty = Fake::always(Answer::reply(200, "[]"));
+    assert_eq!(bindery(&empty).wanting().await.ok(), Some(false));
+    let unread = Fake::always(Answer::reply(200, "{}"));
+    assert!(matches!(
+        bindery(&unread).wanting().await,
+        Err(Failure::Refused { .. })
+    ));
 }
