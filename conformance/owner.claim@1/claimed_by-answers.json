@@ -1,0 +1,10 @@
+{
+  "recorded_from": "ghcr.io/vavallee/bindery@sha256:27109c963f91a27f08d8825b406b2b5a5c59aed080bd9f3a7e585e235673d489",
+  "note": "Bindery is claimed with the administrator lemonfiber minted rather than an account at an outside service, so this is unsupported.",
+  "request": {"method": "POST", "path": "/lemonfiber/owner.claim/v1/claimed_by", "accept": "application/json"},
+  "response": {
+    "status": 500,
+    "headers": {"content-type": "application/problem+json"},
+    "json": {"detail": "Bindery is claimed with the administrator lemonfiber minted, which no outside service names", "type": "unsupported"}
+  }
+}

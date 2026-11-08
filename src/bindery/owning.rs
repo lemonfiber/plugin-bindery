@@ -6,10 +6,10 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use lemonfiber_adapter_kit::credential::Holding;
 use lemonfiber_ports::http::Method;
-use lemonfiber_ports::service::{Failure, Owner, Ownership};
+use lemonfiber_ports::service::{Claim, Failure, Owner, Ownership};
 use serde::Deserialize;
 
-use super::Bindery;
+use super::{unsupported, Bindery};
 
 const STATUS: &str = "/auth/status";
 
@@ -20,6 +20,9 @@ const LOGIN: &str = "/auth/login";
 const SETUP_COMPLETE: u16 = 409;
 
 const NO_ADMINISTRATOR: &str = "this adapter holds no administrator for Bindery";
+
+const CLAIMED_WITH_OWN_SECRET: &str =
+    "Bindery is claimed with the administrator lemonfiber minted, which no outside service names";
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -65,19 +68,23 @@ impl Ownership for Bindery {
         }
     }
 
-    async fn claim(&self) -> Result<Owner, Failure> {
+    async fn claim(&self) -> Result<Claim, Failure> {
         let held = self.owner().await?;
         if held != Owner::Open {
-            return Ok(held);
+            return Ok(Claim::Held(held));
         }
         let response = self
             .endpoint
             .send(&self.request(Method::Post, SETUP, Some(self.administrator()?))?)
             .await?;
         match response.status {
-            SETUP_COMPLETE => self.owner().await,
-            _ if response.is_success() => Ok(Owner::Ours),
+            SETUP_COMPLETE => self.owner().await.map(Claim::Held),
+            _ if response.is_success() => Ok(Claim::Held(Owner::Ours)),
             _ => Err(self.endpoint.refusal(&response)),
         }
+    }
+
+    async fn claimed_by(&self) -> Result<Option<String>, Failure> {
+        Err(unsupported(CLAIMED_WITH_OWN_SECRET))
     }
 }

@@ -244,12 +244,15 @@ async fn a_bindery_nobody_has_set_up_is_open_and_one_set_up_is_ours_only_where_t
 #[tokio::test]
 async fn a_bindery_nobody_has_set_up_is_claimed_for_this_administrator_and_one_set_up_is_left_as_it_is(
 ) {
-    use lemonfiber_ports::service::{Owner, Ownership as _};
+    use lemonfiber_ports::service::{Claim, Owner, Ownership as _};
     let fresh = Fake::in_turn(vec![
         Answer::reply(200, FRESH),
         Answer::reply(200, r#"{"ok":true}"#),
     ]);
-    assert!(matches!(bindery(&fresh).claim().await, Ok(Owner::Ours)));
+    assert!(matches!(
+        bindery(&fresh).claim().await,
+        Ok(Claim::Held(Owner::Ours))
+    ));
     assert_eq!(
         asked(&fresh),
         [
@@ -262,7 +265,10 @@ async fn a_bindery_nobody_has_set_up_is_claimed_for_this_administrator_and_one_s
         ]
     );
     let theirs = Fake::in_turn(vec![Answer::reply(200, SET_UP), Answer::reply(401, "")]);
-    assert!(matches!(bindery(&theirs).claim().await, Ok(Owner::Theirs)));
+    assert!(matches!(
+        bindery(&theirs).claim().await,
+        Ok(Claim::Held(Owner::Theirs))
+    ));
     assert!(asked(&theirs)
         .iter()
         .all(|(_, path, _)| path != "/api/v1/auth/setup"));
@@ -272,7 +278,10 @@ async fn a_bindery_nobody_has_set_up_is_claimed_for_this_administrator_and_one_s
         Answer::reply(200, SET_UP),
         Answer::reply(401, ""),
     ]);
-    assert!(matches!(bindery(&raced).claim().await, Ok(Owner::Theirs)));
+    assert!(matches!(
+        bindery(&raced).claim().await,
+        Ok(Claim::Held(Owner::Theirs))
+    ));
     let refused = Fake::in_turn(vec![Answer::reply(200, FRESH), Answer::reply(400, "")]);
     assert!(matches!(
         bindery(&refused).claim().await,
@@ -296,4 +305,15 @@ async fn without_the_administrator_nothing_is_set_up_and_the_refusal_names_no_pa
         Err(Failure::Refused { detail, .. }) if !detail.contains(USERNAME) && !detail.contains(KEY)
     ));
     assert_eq!(fake.requests().len(), 1);
+}
+
+#[tokio::test]
+async fn the_account_bindery_is_claimed_through_is_named_by_no_outside_service() {
+    use lemonfiber_ports::service::Ownership as _;
+    let fake = Fake::silent();
+    assert!(matches!(
+        bindery(&fake).claimed_by().await,
+        Err(Failure::Unsupported { service, .. }) if service == "bindery"
+    ));
+    assert!(fake.requests().is_empty());
 }

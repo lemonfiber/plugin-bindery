@@ -7,9 +7,10 @@ use lemonfiber_ports::http::Method;
 use lemonfiber_ports::media::{Format, Kind};
 use lemonfiber_ports::service::{
     AddPlan, Added, Carried, Carrying, Catalogue, CatalogueEntry, Category, ClientProbe,
-    Credential, DownloadClient, Failure, FoundItem, Identity, Importing, ItemPart, Maintenance,
-    MusicQuality, Pipeline, QualityProfile, QualityReleases, Queue, QueueItem, Queued, Queues,
-    Record, RegisteredClient, RegisteredFolder, ReleaseProbe, RootFolder, StuckItem, TraceEvent,
+    Credential, CuratedTitle, DownloadClient, Downloading, Failure, FoundItem, Fulfilling, Grabbed,
+    Identity, Importing, ItemPart, Maintenance, MusicQuality, Pipeline, QualityProfile,
+    QualityReleases, Queue, QueueItem, Queued, Queues, Record, RegisteredClient, RegisteredFolder,
+    ReleaseProbe, RootFolder, StuckItem, TitleRequest, TraceEvent,
 };
 use lemonfiber_ports::Client;
 use serde::Deserialize;
@@ -411,6 +412,49 @@ impl Pipeline for Bindery {
     }
 
     async fn stuck_items(&self, _kind: Kind) -> Result<Vec<StuckItem>, Failure> {
+        Err(unsupported(BOOKS_ALONE))
+    }
+}
+
+#[async_trait]
+impl Fulfilling for Bindery {
+    async fn catalogued(
+        &self,
+        _kind: Kind,
+        _reference: i64,
+    ) -> Result<Option<CuratedTitle>, Failure> {
+        Err(unsupported(BOOKS_ALONE))
+    }
+
+    async fn titles(&self, _kind: Kind) -> Result<Vec<CuratedTitle>, Failure> {
+        Err(unsupported(BOOKS_ALONE))
+    }
+
+    async fn held_title(&self, _kind: Kind, _id: i64) -> Result<Option<CuratedTitle>, Failure> {
+        Err(unsupported(BOOKS_ALONE))
+    }
+
+    async fn request(&self, _kind: Kind, _request: &TitleRequest) -> Result<CuratedTitle, Failure> {
+        Err(unsupported(BOOKS_ALONE))
+    }
+
+    async fn search(&self, _kind: Kind, _id: i64) -> Result<(), Failure> {
+        Err(unsupported(BOOKS_ALONE))
+    }
+
+    async fn remove(&self, _kind: Kind, _id: i64) -> Result<(), Failure> {
+        Err(unsupported(BOOKS_ALONE))
+    }
+
+    async fn downloading(&self, _kind: Kind) -> Result<Vec<Downloading>, Failure> {
+        Err(unsupported(BOOKS_ALONE))
+    }
+
+    async fn unqueue(&self, _kind: Kind, _id: i64, _blocklist: bool) -> Result<String, Failure> {
+        Err(unsupported(BOOKS_ALONE))
+    }
+
+    async fn grab(&self, _kind: Kind, _id: i64, _release: &str) -> Result<Grabbed, Failure> {
         Err(unsupported(BOOKS_ALONE))
     }
 }
