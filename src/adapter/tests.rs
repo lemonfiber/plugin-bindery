@@ -84,6 +84,8 @@ async fn nothing_is_answered_without_the_key_or_under_another() {
         for (method, path) in [
             ("POST", "/lemonfiber/indexer.pull/v1/aggregators".to_owned()),
             ("POST", "/lemonfiber/library.curate/v1/identity".to_owned()),
+            ("POST", "/lemonfiber/library.curate/v1/unqueue".to_owned()),
+            ("POST", "/lemonfiber/library.curate/v1/grab".to_owned()),
             ("GET", about_path()),
         ] {
             let fake = Fake::silent();
@@ -137,6 +139,18 @@ async fn what_bindery_has_no_equivalent_for_is_answered_unsupported() {
         ("item_queue", r#"{"kind":"tv","id":1}"#),
         ("item_parts", r#"{"kind":"tv","id":1,"season":null}"#),
         ("stuck_items", r#"{"kind":"movies"}"#),
+        ("catalogued", r#"{"kind":"tv","reference":1}"#),
+        ("titles", r#"{"kind":"movies"}"#),
+        ("held_title", r#"{"kind":"tv","id":1}"#),
+        (
+            "request",
+            r#"{"kind":"tv","request":{"anime":false,"later_seasons":false,"quality_profile":1,"reference":1,"root_folder":"/r","search":false,"seasons":[1]}}"#,
+        ),
+        ("search", r#"{"kind":"tv","id":1}"#),
+        ("remove", r#"{"kind":"movies","id":1}"#),
+        ("downloading", r#"{"kind":"tv"}"#),
+        ("unqueue", r#"{"kind":"tv","id":1,"blocklist":true}"#),
+        ("grab", r#"{"kind":"movies","id":1,"release":"0000"}"#),
     ] {
         let fake = Fake::silent();
         let (status, body) = answered_by(
