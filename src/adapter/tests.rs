@@ -53,12 +53,17 @@ fn kind_of(body: &[u8]) -> Option<serde_json::Value> {
 }
 
 #[test]
-fn it_speaks_the_claim_the_pull_and_the_curator_contracts_and_names_the_release_its_recordings_were_taken_from(
+fn it_speaks_the_claim_the_pull_the_curator_and_the_books_contracts_and_names_the_release_its_recordings_were_taken_from(
 ) {
     let said = about();
     assert_eq!(
         said.speaks,
-        ["owner.claim@1", "indexer.pull@1", "library.curate@1"]
+        [
+            "owner.claim@1",
+            "indexer.pull@1",
+            "library.curate@1",
+            "books.curate@1"
+        ]
     );
     assert_eq!(said.upstream, UPSTREAM);
     assert_eq!(
@@ -86,6 +91,7 @@ async fn nothing_is_answered_without_the_key_or_under_another() {
             ("POST", "/lemonfiber/library.curate/v1/identity".to_owned()),
             ("POST", "/lemonfiber/library.curate/v1/unqueue".to_owned()),
             ("POST", "/lemonfiber/library.curate/v1/grab".to_owned()),
+            ("POST", "/lemonfiber/books.curate/v1/profiles".to_owned()),
             ("GET", about_path()),
         ] {
             let fake = Fake::silent();
@@ -96,6 +102,37 @@ async fn nothing_is_answered_without_the_key_or_under_another() {
             assert!(fake.requests().is_empty());
         }
     }
+}
+
+#[tokio::test]
+async fn books_are_asked_of_bindery_over_their_own_contract() {
+    let fake = Fake::by_path(vec![
+        (
+            "/rootfolder",
+            Answer::reply(200, r#"[{"id":1,"path":"/books"}]"#),
+        ),
+        (
+            "/qualityprofile",
+            Answer::reply(200, r#"[{"id":2,"name":"E-Book"}]"#),
+        ),
+    ]);
+    let (status, body) = answered_by(
+        &fake,
+        "POST",
+        "/lemonfiber/books.curate/v1/profiles",
+        Some(&a_key()),
+        "{}",
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&body).ok(),
+        Some(serde_json::json!({
+            "root_folders": ["/books"],
+            "quality": [{ "id": 2, "name": "E-Book" }],
+            "metadata": [],
+        }))
+    );
 }
 
 #[tokio::test]

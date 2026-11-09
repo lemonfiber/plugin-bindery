@@ -10,8 +10,8 @@
 ## What this repo is
 
 Bindery as a first-party lemonfiber plugin: `plugin.toml` and the adapter that
-speaks the `owner.claim@1`, `indexer.pull@1` and `library.curate@1` contracts in
-front of Bindery. The adapter is the Rust crate at the root, built on
+speaks the `owner.claim@1`, `indexer.pull@1`, `library.curate@1` and
+`books.curate@1` contracts in front of Bindery. The adapter is the Rust crate at the root, built on
 `lemonfiber-adapter-kit` from the core at the commit `Cargo.toml` pins, into the
 image the `Dockerfile` builds. `release.yml` publishes that image from every
 commit on `main` and from the train's tag. The

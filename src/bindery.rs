@@ -5,9 +5,10 @@ use std::sync::Arc;
 
 use lemonfiber_adapter_kit::credential::Holding;
 use lemonfiber_adapter_kit::endpoint::Endpoint;
-use lemonfiber_ports::http::{Http, Method, Request, JSON};
+use lemonfiber_ports::http::{Http, Method, Request, Response, JSON};
 use lemonfiber_ports::service::Failure;
 
+mod collecting;
 mod curating;
 mod owning;
 mod pulling;
@@ -66,12 +67,7 @@ impl Bindery {
             .is_ok_and(|response| response.is_success())
     }
 
-    fn request(
-        &self,
-        method: Method,
-        path: &str,
-        body: Option<String>,
-    ) -> Result<Request, Failure> {
+    fn keyed(&self, method: Method, path: &str, body: Option<String>) -> Result<Request, Failure> {
         let key = self.held.key().map_err(|why| {
             self.endpoint
                 .refused(&format!("this adapter holds no key for Bindery: {why}"))
@@ -96,16 +92,34 @@ impl Bindery {
     ) -> Result<T, Failure> {
         let response = self
             .endpoint
-            .send(&self.request(Method::Get, path, None)?)
+            .send(&self.keyed(Method::Get, path, None)?)
             .await?;
         self.endpoint.decode(&response, what)
     }
 
+    async fn answered(
+        &self,
+        method: Method,
+        path: &str,
+        body: Option<String>,
+    ) -> Result<Response, Failure> {
+        self.endpoint.send(&self.keyed(method, path, body)?).await
+    }
+
+    async fn written<T: serde::de::DeserializeOwned>(
+        &self,
+        method: Method,
+        path: &str,
+        body: &serde_json::Value,
+        what: &str,
+    ) -> Result<T, Failure> {
+        let response = self.answered(method, path, Some(body.to_string())).await?;
+        self.endpoint.expect_success(&response)?;
+        self.endpoint.decode(&response, what)
+    }
+
     async fn done(&self, method: Method, path: &str, body: Option<String>) -> Result<(), Failure> {
-        let response = self
-            .endpoint
-            .send(&self.request(method, path, body)?)
-            .await?;
+        let response = self.endpoint.send(&self.keyed(method, path, body)?).await?;
         self.endpoint.expect_success(&response)
     }
 

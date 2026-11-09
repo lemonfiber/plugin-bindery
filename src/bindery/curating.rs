@@ -22,9 +22,13 @@ const STATUS: &str = "/system/status";
 
 const CLIENTS: &str = "/downloadclient";
 
-const FOLDERS: &str = "/rootfolder";
+pub(super) const FOLDERS: &str = "/rootfolder";
 
-const PROFILES: &str = "/qualityprofile";
+pub(super) const PROFILES: &str = "/qualityprofile";
+
+pub(super) const THE_FOLDERS: &str = "Bindery's root folders could not be read";
+
+pub(super) const THE_PROFILES: &str = "Bindery's quality profiles could not be read";
 
 const INDEXERS: &str = "/indexer";
 
@@ -87,15 +91,15 @@ struct HeldClient {
 }
 
 #[derive(Deserialize)]
-struct Folder {
-    id: i64,
-    path: String,
+pub(super) struct Folder {
+    pub(super) id: i64,
+    pub(super) path: String,
 }
 
 #[derive(Deserialize)]
-struct Profile {
-    id: u32,
-    name: String,
+pub(super) struct Profile {
+    pub(super) id: u32,
+    pub(super) name: String,
 }
 
 #[derive(Deserialize)]
@@ -215,11 +219,7 @@ impl Client for Bindery {
         for client in held {
             let response = self
                 .endpoint
-                .send(&self.request(
-                    Method::Post,
-                    &format!("{CLIENTS}/{}/test", client.id),
-                    None,
-                )?)
+                .send(&self.keyed(Method::Post, &format!("{CLIENTS}/{}/test", client.id), None)?)
                 .await?;
             let said: Option<Probed> = serde_json::from_str(&response.body).ok();
             probes.push(ClientProbe {
@@ -239,9 +239,7 @@ impl Client for Bindery {
     }
 
     async fn root_folders(&self) -> Result<Vec<RegisteredFolder>, Failure> {
-        let held: Vec<Folder> = self
-            .read(FOLDERS, "Bindery's root folders could not be read")
-            .await?;
+        let held: Vec<Folder> = self.read(FOLDERS, THE_FOLDERS).await?;
         Ok(held
             .into_iter()
             .map(|folder| RegisteredFolder {
@@ -270,9 +268,7 @@ impl Client for Bindery {
     }
 
     async fn quality_profiles(&self) -> Result<Vec<QualityProfile>, Failure> {
-        let held: Vec<Profile> = self
-            .read(PROFILES, "Bindery's quality profiles could not be read")
-            .await?;
+        let held: Vec<Profile> = self.read(PROFILES, THE_PROFILES).await?;
         Ok(held
             .into_iter()
             .map(|profile| QualityProfile {

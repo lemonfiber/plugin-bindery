@@ -160,7 +160,12 @@ async fn every_case_its_upstream_is_asked_is_recorded_and_read_as_the_core_reads
     let files = files();
     assert_eq!(
         spoken,
-        ["owner.claim@1", "indexer.pull@1", "library.curate@1"]
+        [
+            "owner.claim@1",
+            "indexer.pull@1",
+            "library.curate@1",
+            "books.curate@1"
+        ]
     );
     let mut faults = Vec::new();
     for capability in lemonfiber_contract::capabilities::all() {

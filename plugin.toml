@@ -43,12 +43,13 @@ digest      = "sha256:c168631a29496eba14549e1ce28296b7ea535fe45c33dac034f3146b0d
 tag         = "main-c4007140020c"
 criticality = "core"
 reaches     = ""
-asks_for    = "Nothing beyond this machine. It answers lemonfiber's owner.claim, indexer.pull and library.curate contracts by calling Bindery, beside it, with the key and the administrator lemonfiber minted for it."
+asks_for    = "Nothing beyond this machine. It answers lemonfiber's owner.claim, indexer.pull, library.curate and books.curate contracts by calling Bindery, beside it, with the key and the administrator lemonfiber minted for it."
 config_path = "/config"
 listens     = 8080
-speaks      = ["owner.claim@1", "indexer.pull@1", "library.curate@1"]
+speaks      = ["owner.claim@1", "indexer.pull@1", "library.curate@1", "books.curate@1"]
 fronts      = "bindery"
-provides    = ["library.curate"]
+provides    = ["library.curate", "books.curate"]
+outside     = { "books.curate@1/lookup-answers" = "openlibrary.org" }
 upstream    = { api_key = { secret = "api-key" }, username = { secret = "admin-username" }, password = { secret = "admin-password" } }
 
 [[secret]]
