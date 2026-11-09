@@ -12,3 +12,8 @@ Servarr = "Servarr"
 komga = "komga"
 Komga = "Komga"
 gotson = "gotson"
+
+[files]
+# The titles and names Bindery's metadata providers answer a lookup with, as their
+# authors spell them.
+extend-exclude = ["conformance/books.curate@1/lookup-answers.json"]
