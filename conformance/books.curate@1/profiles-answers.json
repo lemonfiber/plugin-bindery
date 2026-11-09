@@ -1,0 +1,19 @@
+{
+  "recorded_from": "ghcr.io/vavallee/bindery@sha256:27109c963f91a27f08d8825b406b2b5a5c59aed080bd9f3a7e585e235673d489",
+  "note": "The root folder just registered, the quality profiles a fresh Bindery holds, no metadata profiles, and book and author alone, since a fresh Bindery holds no Hardcover token.",
+  "request": {"method": "POST", "path": "/lemonfiber/books.curate/v1/profiles", "accept": "application/json"},
+  "response": {
+    "status": 200,
+    "headers": {"content-type": "application/json"},
+    "json": {
+      "metadata": [],
+      "quality": [
+        {"id": 1, "name": "Any"},
+        {"id": 2, "name": "E-Book"},
+        {"id": 3, "name": "Audiobook"}
+      ],
+      "root_folders": ["/data/conformance"],
+      "units": ["book", "author"]
+    }
+  }
+}
