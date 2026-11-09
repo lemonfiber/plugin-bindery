@@ -115,6 +115,10 @@ async fn books_are_asked_of_bindery_over_their_own_contract() {
             "/qualityprofile",
             Answer::reply(200, r#"[{"id":2,"name":"E-Book"}]"#),
         ),
+        (
+            "/system/status",
+            Answer::reply(200, r#"{"enhancedHardcoverApi":false}"#),
+        ),
     ]);
     let (status, body) = answered_by(
         &fake,
@@ -131,6 +135,7 @@ async fn books_are_asked_of_bindery_over_their_own_contract() {
             "root_folders": ["/books"],
             "quality": [{ "id": 2, "name": "E-Book" }],
             "metadata": [],
+            "units": ["book", "author"],
         }))
     );
 }

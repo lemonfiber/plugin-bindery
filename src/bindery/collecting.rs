@@ -7,15 +7,17 @@ use async_trait::async_trait;
 use lemonfiber_adapter_kit::endpoint::form_encoded;
 use lemonfiber_ports::http::Method;
 use lemonfiber_ports::service::{
-    AskedWith, BookAsk, BookCurating, BookUnit, Candidate, CandidateState, Candidates, Failure,
-    Profile as Asked,
+    AskedWith, BookAsk, BookCurating, BookUnit, Candidate, CandidateState, Candidates, CuratedUnit,
+    Failure, Profile as Asked,
 };
 use serde::de::DeserializeOwned;
 
-use super::curating::{Folder, Profile, FOLDERS, PROFILES, THE_FOLDERS, THE_PROFILES};
+use super::curating::{Folder, Profile, FOLDERS, PROFILES, STATUS, THE_FOLDERS, THE_PROFILES};
 use super::{unsupported, Bindery};
 use reference::Reference;
-use wire::{published, Author, Book, Disabled, FoundSeries, Page, Series, Setting, WANTED};
+use wire::{
+    published, Author, Book, Disabled, FoundSeries, Offered, Page, Series, Setting, WANTED,
+};
 
 mod asking;
 mod reference;
@@ -321,6 +323,9 @@ impl BookCurating for Bindery {
     async fn profiles(&self) -> Result<AskedWith, Failure> {
         let folders: Vec<Folder> = self.read(FOLDERS, THE_FOLDERS).await?;
         let quality: Vec<Profile> = self.read(PROFILES, THE_PROFILES).await?;
+        let offered: Offered = self
+            .read(STATUS, "Bindery's status could not be read")
+            .await?;
         Ok(AskedWith {
             root_folders: folders.into_iter().map(|one| one.path).collect(),
             quality: quality
@@ -331,6 +336,11 @@ impl BookCurating for Bindery {
                 })
                 .collect(),
             metadata: Vec::new(),
+            units: [BookUnit::Book, BookUnit::Author]
+                .into_iter()
+                .chain(offered.hardcover.then_some(BookUnit::Series))
+                .map(CuratedUnit::from)
+                .collect(),
         })
     }
 }

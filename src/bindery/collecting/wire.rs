@@ -139,6 +139,12 @@ pub(super) struct Setting {
 }
 
 #[derive(Debug, Deserialize)]
+pub(super) struct Offered {
+    #[serde(default, rename = "enhancedHardcoverApi")]
+    pub(super) hardcover: bool,
+}
+
+#[derive(Debug, Deserialize)]
 pub(super) struct Disabled {
     #[serde(default)]
     pub(super) reason: String,

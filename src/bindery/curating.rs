@@ -18,7 +18,7 @@ use serde::Deserialize;
 use super::{unsupported, Bindery};
 use crate::adapter::UPSTREAM;
 
-const STATUS: &str = "/system/status";
+pub(super) const STATUS: &str = "/system/status";
 
 const CLIENTS: &str = "/downloadclient";
 

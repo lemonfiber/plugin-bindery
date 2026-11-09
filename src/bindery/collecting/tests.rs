@@ -3,7 +3,7 @@ use std::sync::Arc;
 use lemonfiber_fixtures::http::{Answer, Fake};
 use lemonfiber_ports::http::Method;
 use lemonfiber_ports::service::{
-    BookAsk, BookCurating as _, BookUnit, Candidate, CandidateState, Failure, Profile,
+    BookAsk, BookCurating as _, BookUnit, Candidate, CandidateState, CuratedUnit, Failure, Profile,
 };
 use serde_json::{json, Value};
 
@@ -640,10 +640,20 @@ async fn a_series_is_read_from_hardcover_or_the_library_or_is_nothing() {
 }
 
 #[tokio::test]
-async fn the_profiles_are_the_root_folders_and_quality_profiles_it_holds() {
-    let fake = rules(Vec::new());
+async fn the_profiles_are_the_root_folders_quality_profiles_and_units_it_answers() {
+    let without = rules(vec![(
+        Method::Get,
+        "/system/status",
+        ok(r#"{"version":"v1.43.1","enhancedHardcoverApi":false}"#),
+    )]);
+    let with_hardcover = rules(vec![(
+        Method::Get,
+        "/system/status",
+        ok(r#"{"version":"v1.43.1","enhancedHardcoverApi":true}"#),
+    )]);
 
-    let with = bindery(&fake).profiles().await.ok();
+    let with = bindery(&without).profiles().await.ok();
+    let series = bindery(&with_hardcover).profiles().await.ok();
 
     assert_eq!(
         with.as_ref().map(|with| with.root_folders.clone()),
@@ -656,7 +666,22 @@ async fn the_profiles_are_the_root_folders_and_quality_profiles_it_holds() {
             name: "E-Book".to_owned()
         }])
     );
-    assert_eq!(with.map(|with| with.metadata), Some(Vec::new()));
+    assert_eq!(
+        with.as_ref().map(|with| with.metadata.clone()),
+        Some(Vec::new())
+    );
+    assert_eq!(
+        with.map(|with| with.units),
+        Some(vec![CuratedUnit::Book, CuratedUnit::Author])
+    );
+    assert_eq!(
+        series.map(|with| with.units),
+        Some(vec![
+            CuratedUnit::Book,
+            CuratedUnit::Author,
+            CuratedUnit::Series
+        ])
+    );
 }
 
 #[tokio::test]
