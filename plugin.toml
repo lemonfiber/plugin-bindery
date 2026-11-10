@@ -87,11 +87,14 @@ expect  = { status = 401, json = { error = "unauthorized" } }
 [[ask]]
 service    = "bindery"
 capability = "download.usenet"
+native     = "sabnzbd"
 
 [[ask]]
 service    = "bindery"
 capability = "download.torrent"
+native     = "qbittorrent"
 
 [[ask]]
 service    = "bindery"
 capability = "indexer.search"
+native     = ["servarr", "nzbhydra2"]
