@@ -59,7 +59,7 @@ impl Ownership for Bindery {
         }
         let response = self
             .endpoint
-            .send(&self.request(Method::Post, LOGIN, Some(self.administrator()?))?)
+            .send(&self.keyed(Method::Post, LOGIN, Some(self.administrator()?))?)
             .await?;
         match response.status {
             401 | 403 => Ok(Owner::Theirs),
@@ -75,7 +75,7 @@ impl Ownership for Bindery {
         }
         let response = self
             .endpoint
-            .send(&self.request(Method::Post, SETUP, Some(self.administrator()?))?)
+            .send(&self.keyed(Method::Post, SETUP, Some(self.administrator()?))?)
             .await?;
         match response.status {
             SETUP_COMPLETE => self.owner().await.map(Claim::Held),

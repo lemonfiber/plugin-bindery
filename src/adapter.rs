@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use lemonfiber_adapter_kit::{Kit, Readiness};
 use lemonfiber_contract::adapter::{About, Release};
-use lemonfiber_contract::capabilities::{indexer, library, owner};
+use lemonfiber_contract::capabilities::{books, indexer, library, owner};
 
 use crate::bindery::Bindery;
 
@@ -31,6 +31,7 @@ pub fn about() -> About {
             lemonfiber_contract::spoken(owner::claim::CAPABILITY, owner::claim::MAJOR),
             lemonfiber_contract::spoken(indexer::pull::CAPABILITY, indexer::pull::MAJOR),
             lemonfiber_contract::spoken(library::curate::CAPABILITY, library::curate::MAJOR),
+            lemonfiber_contract::spoken(books::curate::CAPABILITY, books::curate::MAJOR),
         ],
         upstream: UPSTREAM.to_owned(),
         releases: vec![Release {
@@ -52,7 +53,8 @@ pub fn kit(key: String, bindery: Arc<Bindery>) -> Kit {
         .ready_when(ready)
         .serving(owner::claim::served(Arc::clone(&bindery)))
         .serving(indexer::pull::served(Arc::clone(&bindery)))
-        .serving(library::curate::served(bindery))
+        .serving(library::curate::served(Arc::clone(&bindery)))
+        .serving(books::curate::served(bindery))
 }
 
 #[cfg(test)]

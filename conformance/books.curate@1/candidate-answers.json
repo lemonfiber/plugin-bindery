@@ -1,0 +1,10 @@
+{
+  "recorded_from": "ghcr.io/vavallee/bindery@sha256:27109c963f91a27f08d8825b406b2b5a5c59aed080bd9f3a7e585e235673d489",
+  "note": "A reference this adapter did not compose names nothing, and Bindery is not asked.",
+  "request": {"method": "POST", "path": "/lemonfiber/books.curate/v1/candidate", "accept": "application/json"},
+  "response": {
+    "status": 200,
+    "headers": {"content-type": "application/json"},
+    "body_starts_with": "null"
+  }
+}
