@@ -19,6 +19,8 @@ use super::queued::{fingerprint, Download, QUEUE};
 use super::tracing::{Event, Found, GRABBED, HISTORY};
 use super::{unsupported, Bindery};
 
+const UNREFERENCED: i64 = 0;
+
 const SEARCH: &str = "/wanted/bulk";
 
 const SEARCHED: &str = "search";
@@ -84,7 +86,7 @@ impl Book {
 
     fn curated(self) -> CuratedTitle {
         CuratedTitle {
-            reference: self.id,
+            reference: UNREFERENCED,
             id: Some(self.id),
             year: self.year().map(u32::from),
             monitored: self.monitored,

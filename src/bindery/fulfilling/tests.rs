@@ -55,7 +55,7 @@ fn grabs(guid: &str) -> Answer {
 }
 
 #[tokio::test]
-async fn every_book_bindery_holds_is_a_title_under_its_own_id() {
+async fn every_book_bindery_holds_is_a_title_under_its_own_id_with_no_catalogue_reference() {
     let fake = Fake::always(Answer::reply(
         200,
         r#"{"items":[
@@ -66,7 +66,7 @@ async fn every_book_bindery_holds_is_a_title_under_its_own_id() {
         ]}"#,
     ));
     let title = |id: i64, title: &str, year, monitored, files| CuratedTitle {
-        reference: id,
+        reference: 0,
         id: Some(id),
         title: title.to_owned(),
         year,
