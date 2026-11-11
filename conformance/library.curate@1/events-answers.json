@@ -1,0 +1,10 @@
+{
+  "recorded_from": "ghcr.io/vavallee/bindery@sha256:27109c963f91a27f08d8825b406b2b5a5c59aed080bd9f3a7e585e235673d489",
+  "note": "Bindery cannot post what it did to an address pinning its certificate, and this adapter does not read its history for the core, so this is unsupported.",
+  "request": {"method": "POST", "path": "/lemonfiber/library.curate/v1/events", "accept": "application/json"},
+  "response": {
+    "status": 500,
+    "headers": {"content-type": "application/problem+json"},
+    "json": {"detail": "Bindery cannot post what it did to an address pinning its certificate, and this adapter does not read Bindery's history for the core", "type": "unsupported"}
+  }
+}

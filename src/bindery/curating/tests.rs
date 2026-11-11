@@ -2,7 +2,7 @@ use lemonfiber_fixtures::http::{Answer, Fake};
 use lemonfiber_ports::http::Method;
 use lemonfiber_ports::service::{
     Catalogue as _, Category, ClientProbe, Credential, DownloadClient, Failure, Identity,
-    Maintenance as _, Protocol, QualityProfile, Queue, Queued, Queues as _, RegisteredClient,
+    Maintenance as _, Protocol, QualityProfile, Recounting as _, RegisteredClient,
     RegisteredFolder, RootFolder,
 };
 use lemonfiber_ports::Client as _;
@@ -300,39 +300,6 @@ async fn quality_profiles_and_indexers_are_read_from_bindery() {
 }
 
 #[tokio::test]
-async fn the_queue_is_answered_in_bindery_s_words_with_what_stopped_marked() {
-    let fake = Fake::always(Answer::reply(
-        200,
-        r#"{"items":[
-          {"id":1,"title":"Moving","status":"downloading","errorMessage":""},
-          {"id":2,"title":"Broken","status":"importFailed","errorMessage":"permission denied"},
-          {"id":3,"title":"Held","status":"importHeld"}
-        ]}"#,
-    ));
-    let queued = |title: &str, status: &str, state: &str, message: Option<&str>| Queued {
-        title: title.to_owned(),
-        status: status.to_owned(),
-        state: state.to_owned(),
-        message: message.map(str::to_owned),
-        download_id: None,
-        grabs: 1,
-    };
-    assert_eq!(
-        bindery(&fake).queue().await.ok(),
-        Some(Queue {
-            total: 3,
-            items: vec![
-                queued("Moving", "ok", "downloading", None),
-                queued("Broken", "error", "importFailed", Some("permission denied")),
-                queued("Held", "warning", "importHeld", None),
-            ],
-        })
-    );
-    let empty = Fake::always(Answer::reply(200, "{}"));
-    assert_eq!(bindery(&empty).queue().await.ok(), Some(Queue::default()));
-}
-
-#[tokio::test]
 async fn it_is_wanting_while_its_wanted_list_holds_a_book_and_searches_nothing() {
     let fake = Fake::always(Answer::reply(200, r#"[{"id":3,"title":"A Book"}]"#));
     assert_eq!(bindery(&fake).wanting().await.ok(), Some(true));
@@ -347,4 +314,17 @@ async fn it_is_wanting_while_its_wanted_list_holds_a_book_and_searches_nothing()
         bindery(&unread).wanting().await,
         Err(Failure::Refused { .. })
     ));
+}
+
+#[tokio::test]
+async fn bindery_is_not_asked_to_tell_the_core_what_it_did_and_says_why() {
+    let fake = Fake::silent();
+    let said = bindery(&fake)
+        .events(Some("https://core:8443/told"), Some("ab"), Some("key"))
+        .await;
+    assert!(
+        matches!(&said, Err(Failure::Unsupported { detail, .. }) if detail.contains("certificate")),
+        "{said:?}"
+    );
+    assert!(fake.requests().is_empty());
 }

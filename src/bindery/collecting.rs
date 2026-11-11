@@ -15,9 +15,8 @@ use serde::de::DeserializeOwned;
 use super::curating::{Folder, Profile, FOLDERS, PROFILES, STATUS, THE_FOLDERS, THE_PROFILES};
 use super::{unsupported, Bindery};
 use reference::Reference;
-use wire::{
-    published, Author, Book, Disabled, FoundSeries, Offered, Page, Series, Setting, WANTED,
-};
+use wire::{published, Author, Disabled, FoundSeries, Offered, Series, Setting, WANTED};
+pub(super) use wire::{Book, Page};
 
 mod asking;
 mod reference;
@@ -33,13 +32,13 @@ const SERIES_SEARCH: &str = "/series/hardcover/search";
 
 const SERIES_FOUND: &str = "50";
 
-const BOOKS: &str = "/book";
+pub(super) const BOOKS: &str = "/book";
 
 const AUTHORS: &str = "/author";
 
 const SERIES: &str = "/series";
 
-const HELD_PAGE: usize = 500;
+pub(super) const HELD_PAGE: usize = 500;
 
 const MEDIA_TYPE: &str = "/setting/default.media_type";
 
@@ -47,7 +46,7 @@ const FORMATS: [&str; 3] = ["ebook", "audiobook", "both"];
 
 const EBOOK: &str = "ebook";
 
-const NOT_FOUND: u16 = 404;
+pub(super) const NOT_FOUND: u16 = 404;
 
 const MISSING_TOKEN: &str = "missing_token";
 
@@ -59,7 +58,7 @@ const NO_SUCH_PAGE: &str = "that page begins nowhere a lookup gives";
 
 const NOT_IN_THE_CATALOGUE: &str = "its catalogue holds no such reference";
 
-const THE_BOOKS: &str = "Bindery's books could not be read";
+pub(super) const THE_BOOKS: &str = "Bindery's books could not be read";
 
 const THE_AUTHORS: &str = "Bindery's authors could not be read";
 
