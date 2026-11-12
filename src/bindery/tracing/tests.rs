@@ -140,7 +140,6 @@ async fn a_book_s_history_is_what_bindery_recorded_of_it_alone() {
         bindery(&fake).item_history(TitleKind::Books, 4).await.ok(),
         Some(vec![
             event(Outcome::Imported, "2026-11-02T10:00:00Z"),
-            event(Outcome::Imported, "2026-11-02T09:00:00Z"),
             event(Outcome::DownloadFailed, "2026-11-01T12:00:00Z"),
             event(Outcome::DownloadFailed, "2026-11-01T11:00:00Z"),
             event(Outcome::Grabbed, "2026-11-01T10:00:00Z"),

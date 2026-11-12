@@ -5,6 +5,7 @@ use std::collections::BTreeSet;
 
 use async_trait::async_trait;
 use lemonfiber_adapter_kit::endpoint::form_encoded;
+use lemonfiber_manifest::ApiKind;
 use lemonfiber_ports::http::Method;
 use lemonfiber_ports::media::TitleKind;
 use lemonfiber_ports::service::stage::{Outcome, HISTORY_HORIZON};
@@ -28,14 +29,6 @@ const FIRST: &str = "limit=1&offset=0";
 
 const THE_SEARCH: &str = "Bindery's search for the book could not be read";
 
-const OUTCOMES: [(&str, Outcome); 6] = [
-    (GRABBED, Outcome::Grabbed),
-    ("downloadFailed", Outcome::DownloadFailed),
-    ("downloadStalled", Outcome::DownloadFailed),
-    ("bookImported", Outcome::Imported),
-    ("downloadFolderImported", Outcome::Imported),
-    ("bookFileDeleted", Outcome::Removed),
-];
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(super) struct Event {
@@ -165,14 +158,11 @@ impl Pipeline for Bindery {
             .await?
             .into_iter()
             .filter_map(|event| {
-                OUTCOMES
-                    .iter()
-                    .find(|(named, _)| *named == event.kind)
-                    .map(|(_, outcome)| TraceEvent {
-                        outcome: *outcome,
-                        at: event.created_at,
-                        part: None,
-                    })
+                Outcome::of_event(ApiKind::Bindery, &event.kind).map(|outcome| TraceEvent {
+                    outcome,
+                    at: event.created_at,
+                    part: None,
+                })
             })
             .collect())
     }
