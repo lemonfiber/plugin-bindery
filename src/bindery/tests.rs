@@ -133,6 +133,59 @@ async fn a_prowlarr_is_added_with_its_key_to_be_read_on_every_start() {
 }
 
 #[tokio::test]
+async fn bindery_reads_its_indexers_again_from_every_prowlarr_it_reads_from() {
+    let fake = Fake::by_route(vec![
+        (
+            Method::Get,
+            "/prowlarr",
+            Answer::reply(
+                200,
+                r#"[{"id":3,"enabled":true},{"id":4,"enabled":false},{"id":5,"enabled":true}]"#,
+            ),
+        ),
+        (
+            Method::Post,
+            "/sync",
+            Answer::reply(200, r#"{"added":2,"updated":0,"removed":0}"#),
+        ),
+    ]);
+    assert!(bindery(&fake).pull().await.is_ok());
+    assert_eq!(
+        asked(&fake),
+        [
+            (Method::Get, "/api/v1/prowlarr".to_owned(), None),
+            (Method::Post, "/api/v1/prowlarr/3/sync".to_owned(), None),
+            (Method::Post, "/api/v1/prowlarr/5/sync".to_owned(), None),
+        ]
+    );
+    let none = Fake::always(Answer::reply(200, "[]"));
+    assert!(bindery(&none).pull().await.is_ok());
+    assert_eq!(
+        asked(&none),
+        [(Method::Get, "/api/v1/prowlarr".to_owned(), None)]
+    );
+    let unreached = Fake::by_route(vec![
+        (
+            Method::Get,
+            "/prowlarr",
+            Answer::reply(200, r#"[{"id":3,"enabled":true}]"#),
+        ),
+        (
+            Method::Post,
+            "/sync",
+            Answer::reply(
+                502,
+                r#"{"error":"fetch prowlarr indexers: connection refused"}"#,
+            ),
+        ),
+    ]);
+    assert!(matches!(
+        bindery(&unreached).pull().await,
+        Err(Failure::Refused { detail, .. }) if detail.contains("connection refused")
+    ));
+}
+
+#[tokio::test]
 async fn an_aggregator_in_any_other_api_than_prowlarr_s_is_unsupported_and_bindery_is_not_asked() {
     let fake = Fake::silent();
     assert!(matches!(

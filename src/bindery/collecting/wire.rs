@@ -76,6 +76,10 @@ pub(super) struct Author {
     #[serde(default)]
     pub(super) monitored: bool,
     #[serde(default)]
+    pub(super) monitor_mode: String,
+    #[serde(default)]
+    pub(super) monitored_series_ids: Vec<i64>,
+    #[serde(default)]
     pub(super) books: Vec<Book>,
 }
 
