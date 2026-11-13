@@ -50,6 +50,30 @@ book's own.
   holds under its Hardcover id where it held one when asked. A later book by an
   author outside the series' first authors is missed.
 
+## What the trace reads
+
+The trace, queue health and the stuck list follow a book through `library.curate`,
+with the book as the item under Bindery's own id; every other kind of media is
+answered unsupported.
+
+- **Finding a book** matches the term against its own title, so an author's other
+  books never stand in for it. A book has no parts.
+- **Its history** is Bindery's newest history of that book: grabbed, a download
+  failed or stalled, imported, a file deleted.
+- **Its queue** is each download Bindery still has on its way for it, stuck where
+  Bindery's own queue marks it as an error or holds its import. A stuck book is
+  named by its own title, with the queue entry, the book and its release's
+  fingerprint: the SHA-256 of the release's GUID as Bindery's API shows it.
+- **A search** asks Bindery to search for the book and grab what it wants.
+- **Dropping a download** blocklists its release through the grab Bindery's history
+  holds for it, where asked, and removes it from the download client. **Grabbing it
+  again** searches for the book, lifts that release's blocklist entries for the
+  book, by its fingerprint or by the title of the release that search finds, and
+  grabs it, or answers that it is gone.
+- **Telling the core what Bindery did** is unsupported: Bindery cannot post to an
+  address pinning its certificate, and this adapter does not read Bindery's history
+  for the core.
+
 ## What is here
 
 | Path | What it is |

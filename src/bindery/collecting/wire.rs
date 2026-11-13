@@ -27,15 +27,15 @@ pub(super) struct Credited {
 
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(super) struct Book {
+pub(in crate::bindery) struct Book {
     #[serde(default)]
-    pub(super) id: i64,
+    pub(in crate::bindery) id: i64,
     #[serde(default)]
     pub(super) foreign_book_id: String,
     #[serde(default)]
-    pub(super) title: String,
+    pub(in crate::bindery) title: String,
     #[serde(default)]
-    pub(super) release_date: Option<String>,
+    pub(in crate::bindery) release_date: Option<String>,
     #[serde(default)]
     pub(super) image_url: Option<String>,
     #[serde(default)]
@@ -47,17 +47,17 @@ pub(super) struct Book {
     #[serde(default)]
     pub(super) status: String,
     #[serde(default)]
-    pub(super) monitored: bool,
+    pub(in crate::bindery) monitored: bool,
     #[serde(default)]
     pub(super) excluded: bool,
     #[serde(default)]
     pub(super) media_type: String,
     #[serde(default)]
-    pub(super) file_path: String,
+    pub(in crate::bindery) file_path: String,
     #[serde(default)]
-    pub(super) ebook_file_path: String,
+    pub(in crate::bindery) ebook_file_path: String,
     #[serde(default)]
-    pub(super) audiobook_file_path: String,
+    pub(in crate::bindery) audiobook_file_path: String,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -127,9 +127,9 @@ pub(super) struct Series {
 }
 
 #[derive(Debug, Deserialize)]
-pub(super) struct Page<T> {
+pub(in crate::bindery) struct Page<T> {
     #[serde(default = "Vec::new")]
-    pub(super) items: Vec<T>,
+    pub(in crate::bindery) items: Vec<T>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -184,7 +184,7 @@ impl Book {
             .filter(|name| !name.is_empty())
     }
 
-    pub(super) fn year(&self) -> Option<u16> {
+    pub(in crate::bindery) fn year(&self) -> Option<u16> {
         self.release_date
             .as_deref()
             .and_then(|date| date.get(..YEAR_DIGITS))

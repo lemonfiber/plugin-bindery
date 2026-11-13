@@ -1,16 +1,14 @@
 //! What Bindery files under and fetches with: its download clients, root folders, quality
-//! profiles, indexers and queue; and the curator operations it has no equivalent for,
-//! answered unsupported.
+//! profiles and indexers; and the curator operations it has no equivalent for, answered
+//! unsupported.
 
 use async_trait::async_trait;
 use lemonfiber_ports::http::Method;
-use lemonfiber_ports::media::{Format, Kind};
+use lemonfiber_ports::media::{Format, Kind, TitleKind};
 use lemonfiber_ports::service::{
     AddPlan, Added, Carried, Carrying, Catalogue, CatalogueEntry, Category, ClientProbe,
-    Credential, CuratedTitle, DownloadClient, Downloading, Failure, FoundItem, Fulfilling, Grabbed,
-    Identity, Importing, ItemPart, Maintenance, MusicQuality, Pipeline, QualityProfile,
-    QualityReleases, Queue, QueueItem, Queued, Queues, Record, RegisteredClient, RegisteredFolder,
-    ReleaseProbe, RootFolder, StuckItem, TitleRequest, TraceEvent,
+    Credential, DownloadClient, Failure, Identity, Importing, Maintenance, MusicQuality,
+    QualityProfile, Record, Recounting, RegisteredClient, RegisteredFolder, RootFolder,
 };
 use lemonfiber_ports::Client;
 use serde::Deserialize;
@@ -32,9 +30,9 @@ pub(super) const THE_PROFILES: &str = "Bindery's quality profiles could not be r
 
 const INDEXERS: &str = "/indexer";
 
-const QUEUE: &str = "/queue";
+pub(super) const WANTED: &str = "/wanted/missing";
 
-const WANTED: &str = "/wanted/missing";
+pub(super) const THE_WANTED: &str = "Bindery's wanted list could not be read";
 
 const CATEGORY: &str = "category";
 
@@ -49,29 +47,22 @@ const KINDS: [&str; 6] = [
     "rtorrent",
 ];
 
-const FAILED: [&str; 3] = ["failed", "importFailed", "importBlocked"];
-
-const HELD: &str = "importHeld";
-
-const ERROR: &str = "error";
-
-const WARNING: &str = "warning";
-
-const OK: &str = "ok";
-
 const NO_CATEGORY_FIELD: &str =
     "Bindery files under `category`, and under `categoryAudiobook` for audiobooks, and nothing else";
 
 const NO_KIND: &str =
     "Bindery takes SABnzbd, NZBGet, qBittorrent, Transmission, Deluge and rTorrent";
 
-const BOOKS_ALONE: &str = "Bindery files books, which no kind of media this asks about is";
+pub(super) const BOOKS_ALONE: &str =
+    "Bindery files books, which no kind of media this asks about is";
 
 const NO_HARDLINKS: &str = "Bindery says nothing of whether it imports by hard link";
 
 const NO_RECORDS: &str = "Bindery carries no records to or from another curator";
 
 const NO_MUSIC: &str = "Bindery files no music";
+
+const NOT_RECOUNTED: &str = "Bindery cannot post what it did to an address pinning its certificate, and this adapter does not read Bindery's history for the core";
 
 #[derive(Deserialize)]
 struct Status {
@@ -104,34 +95,9 @@ pub(super) struct Profile {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct Download {
-    title: String,
-    status: String,
-    #[serde(default)]
-    error_message: String,
-}
-
-#[derive(Deserialize)]
-struct Downloads {
-    #[serde(default)]
-    items: Vec<Download>,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
 struct Probed {
     #[serde(default)]
     error: Option<String>,
-}
-
-fn tracking(state: &str) -> &'static str {
-    if FAILED.contains(&state) {
-        ERROR
-    } else if state == HELD {
-        WARNING
-    } else {
-        OK
-    }
 }
 
 impl Bindery {
@@ -280,30 +246,6 @@ impl Client for Bindery {
 }
 
 #[async_trait]
-impl Queues for Bindery {
-    async fn queue(&self) -> Result<Queue, Failure> {
-        let held: Downloads = self
-            .read(QUEUE, "Bindery's queue could not be read")
-            .await?;
-        Ok(Queue {
-            total: held.items.len(),
-            items: held
-                .items
-                .into_iter()
-                .map(|download| Queued {
-                    status: tracking(&download.status).to_owned(),
-                    message: (!download.error_message.is_empty()).then_some(download.error_message),
-                    title: download.title,
-                    state: download.status,
-                    download_id: None,
-                    grabs: 1,
-                })
-                .collect(),
-        })
-    }
-}
-
-#[async_trait]
 impl Catalogue for Bindery {
     async fn lookup(&self, _kind: Kind, _term: &str) -> Result<Vec<CatalogueEntry>, Failure> {
         Err(unsupported(BOOKS_ALONE))
@@ -337,9 +279,7 @@ impl Maintenance for Bindery {
     }
 
     async fn wanting(&self) -> Result<bool, Failure> {
-        let wanted: Vec<serde_json::Value> = self
-            .read(WANTED, "the wanted list could not be read")
-            .await?;
+        let wanted: Vec<serde_json::Value> = self.read(WANTED, THE_WANTED).await?;
         Ok(!wanted.is_empty())
     }
 }
@@ -367,13 +307,6 @@ impl Carrying for Bindery {
 }
 
 #[async_trait]
-impl QualityReleases for Bindery {
-    async fn probe_releases(&self, _kind: Kind) -> Result<ReleaseProbe, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-}
-
-#[async_trait]
 impl MusicQuality for Bindery {
     async fn apply_music_format(&self, _format: Format) -> Result<(), Failure> {
         Err(unsupported(NO_MUSIC))
@@ -381,76 +314,21 @@ impl MusicQuality for Bindery {
 }
 
 #[async_trait]
-impl Pipeline for Bindery {
-    async fn library(&self, _kind: Kind) -> Result<Vec<FoundItem>, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn find_items(&self, _kind: Kind, _term: &str) -> Result<Vec<FoundItem>, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn item_history(&self, _kind: Kind, _id: i64) -> Result<Vec<TraceEvent>, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn item_queue(&self, _kind: Kind, _id: i64) -> Result<Vec<QueueItem>, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn item_parts(
+impl Recounting for Bindery {
+    async fn events(
         &self,
-        _kind: Kind,
-        _id: i64,
-        _season: Option<u32>,
-    ) -> Result<Vec<ItemPart>, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn stuck_items(&self, _kind: Kind) -> Result<Vec<StuckItem>, Failure> {
-        Err(unsupported(BOOKS_ALONE))
+        _address: Option<&str>,
+        _pin: Option<&str>,
+        _key: Option<&str>,
+    ) -> Result<(), Failure> {
+        Err(unsupported(NOT_RECOUNTED))
     }
 }
 
-#[async_trait]
-impl Fulfilling for Bindery {
-    async fn catalogued(
-        &self,
-        _kind: Kind,
-        _reference: i64,
-    ) -> Result<Option<CuratedTitle>, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn titles(&self, _kind: Kind) -> Result<Vec<CuratedTitle>, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn held_title(&self, _kind: Kind, _id: i64) -> Result<Option<CuratedTitle>, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn request(&self, _kind: Kind, _request: &TitleRequest) -> Result<CuratedTitle, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn search(&self, _kind: Kind, _id: i64) -> Result<(), Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn remove(&self, _kind: Kind, _id: i64) -> Result<(), Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn downloading(&self, _kind: Kind) -> Result<Vec<Downloading>, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn unqueue(&self, _kind: Kind, _id: i64, _blocklist: bool) -> Result<String, Failure> {
-        Err(unsupported(BOOKS_ALONE))
-    }
-
-    async fn grab(&self, _kind: Kind, _id: i64, _release: &str) -> Result<Grabbed, Failure> {
+pub(super) fn books_alone(kind: TitleKind) -> Result<(), Failure> {
+    if kind == TitleKind::Books {
+        Ok(())
+    } else {
         Err(unsupported(BOOKS_ALONE))
     }
 }

@@ -10,8 +10,11 @@ use lemonfiber_ports::service::Failure;
 
 mod collecting;
 mod curating;
+mod fulfilling;
 mod owning;
 mod pulling;
+mod queued;
+mod tracing;
 
 /// What every failure is blamed on.
 pub const SERVICE: &str = "bindery";
