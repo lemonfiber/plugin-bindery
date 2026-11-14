@@ -6,6 +6,7 @@ use lemonfiber_ports::service::{
     Failure, FoundItem, Pipeline as _, QualityReleases as _, QueueItem, ReleaseProbe, StuckItem,
     TraceEvent,
 };
+use lemonfiber_ports::Instant;
 
 use super::super::queued::fingerprint;
 use super::super::tests::{asked, bindery};
@@ -133,7 +134,7 @@ async fn a_book_s_history_is_what_bindery_recorded_of_it_alone() {
     ));
     let event = |outcome, at: &str| TraceEvent {
         outcome,
-        at: at.to_owned(),
+        at: Instant::from_service_text(at),
         part: None,
     };
     assert_eq!(

@@ -63,6 +63,7 @@ impl Bindery {
             headers: Vec::new(),
             body: None,
             pinned: None,
+            deadline: None,
         };
         self.endpoint
             .send(&request)
@@ -85,6 +86,7 @@ impl Bindery {
             headers,
             body,
             pinned: None,
+            deadline: None,
         })
     }
 
