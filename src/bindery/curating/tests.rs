@@ -320,7 +320,12 @@ async fn it_is_wanting_while_its_wanted_list_holds_a_book_and_searches_nothing()
 async fn bindery_is_not_asked_to_tell_the_core_what_it_did_and_says_why() {
     let fake = Fake::silent();
     let said = bindery(&fake)
-        .events(Some("https://core:8443/told"), Some("ab"), Some("key"))
+        .events(
+            Some("https://core:8443/told"),
+            Some("ab"),
+            Some("key"),
+            None,
+        )
         .await;
     assert!(
         matches!(&said, Err(Failure::Unsupported { detail, .. }) if detail.contains("certificate")),

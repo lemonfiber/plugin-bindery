@@ -22,7 +22,7 @@ const SEARCH: &str = "search";
 
 const EVERY_BOOK: &str = "all";
 
-const SERIES_ONLY: &str = "series";
+pub(super) const SERIES_ONLY: &str = "series";
 
 const CREATED: u16 = 201;
 

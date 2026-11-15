@@ -13,6 +13,7 @@ use lemonfiber_ports::service::{
     Failure, FoundItem, ItemPart, Pipeline, QualityReleases, QueueItem, ReleaseProbe, StuckItem,
     TraceEvent,
 };
+use lemonfiber_ports::Instant;
 use serde::Deserialize;
 
 use super::collecting::{Book, Page, BOOKS, HELD_PAGE, THE_BOOKS};
@@ -160,7 +161,7 @@ impl Pipeline for Bindery {
             .filter_map(|event| {
                 Outcome::of_event(ApiKind::Bindery, &event.kind).map(|outcome| TraceEvent {
                     outcome,
-                    at: event.created_at,
+                    at: Instant::from_service_text(&event.created_at),
                     part: None,
                 })
             })

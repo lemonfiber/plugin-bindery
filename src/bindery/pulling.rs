@@ -1,4 +1,5 @@
-//! The Prowlarr instances Bindery pulls its indexers from, and telling it about another.
+//! The Prowlarr instances Bindery pulls its indexers from, telling it about another, and
+//! having it read its indexers again from every one it reads from.
 
 use async_trait::async_trait;
 use lemonfiber_ports::http::Method;
@@ -8,6 +9,10 @@ use serde::Deserialize;
 use super::{unsupported, Bindery};
 
 const INSTANCES: &str = "/prowlarr";
+
+const SYNC: &str = "sync";
+
+const THE_INSTANCES: &str = "the Prowlarr instances Bindery pulls from could not be read";
 
 const READS_SERVARR: &str = "servarr";
 
@@ -22,17 +27,14 @@ struct Instance {
     url: String,
     #[serde(default)]
     api_key_configured: bool,
+    #[serde(default)]
+    enabled: bool,
 }
 
 #[async_trait]
 impl PullsIndexers for Bindery {
     async fn aggregators(&self) -> Result<Vec<KnownAggregator>, Failure> {
-        let held: Vec<Instance> = self
-            .read(
-                INSTANCES,
-                "the Prowlarr instances Bindery pulls from could not be read",
-            )
-            .await?;
+        let held: Vec<Instance> = self.read(INSTANCES, THE_INSTANCES).await?;
         Ok(held
             .into_iter()
             .map(|instance| KnownAggregator {
@@ -56,5 +58,18 @@ impl PullsIndexers for Bindery {
         })
         .to_string();
         self.done(Method::Post, INSTANCES, Some(body)).await
+    }
+
+    async fn pull(&self) -> Result<(), Failure> {
+        let held: Vec<Instance> = self.read(INSTANCES, THE_INSTANCES).await?;
+        for instance in held.iter().filter(|instance| instance.enabled) {
+            self.done(
+                Method::Post,
+                &format!("{INSTANCES}/{}/{SYNC}", instance.id),
+                None,
+            )
+            .await?;
+        }
+        Ok(())
     }
 }

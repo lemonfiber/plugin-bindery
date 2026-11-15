@@ -7,8 +7,9 @@ use lemonfiber_ports::http::Method;
 use lemonfiber_ports::media::{Format, Kind, TitleKind};
 use lemonfiber_ports::service::{
     AddPlan, Added, Carried, Carrying, Catalogue, CatalogueEntry, Category, ClientProbe,
-    Credential, DownloadClient, Failure, Identity, Importing, Maintenance, MusicQuality,
-    QualityProfile, Record, Recounting, RegisteredClient, RegisteredFolder, RootFolder,
+    Credential, CutoffUnmet, DownloadClient, Failure, Heard, Identity, Importing, Maintenance,
+    MusicQuality, QualityProfile, Record, Recounting, RegisteredClient, RegisteredFolder,
+    RootFolder,
 };
 use lemonfiber_ports::Client;
 use serde::Deserialize;
@@ -274,13 +275,17 @@ impl Catalogue for Bindery {
 
 #[async_trait]
 impl Maintenance for Bindery {
-    async fn search_upgrades(&self, _kind: Kind) -> Result<(), Failure> {
+    async fn search_upgrades(&self, _kind: TitleKind) -> Result<(), Failure> {
         Err(unsupported(BOOKS_ALONE))
     }
 
     async fn wanting(&self) -> Result<bool, Failure> {
         let wanted: Vec<serde_json::Value> = self.read(WANTED, THE_WANTED).await?;
         Ok(!wanted.is_empty())
+    }
+
+    async fn cutoff_unmet(&self, _kind: TitleKind) -> Result<CutoffUnmet, Failure> {
+        Err(unsupported(BOOKS_ALONE))
     }
 }
 
@@ -320,7 +325,8 @@ impl Recounting for Bindery {
         _address: Option<&str>,
         _pin: Option<&str>,
         _key: Option<&str>,
-    ) -> Result<(), Failure> {
+        _every: Option<u32>,
+    ) -> Result<Option<Heard>, Failure> {
         Err(unsupported(NOT_RECOUNTED))
     }
 }

@@ -20,6 +20,7 @@ pub(super) use wire::{Book, Page};
 
 mod asking;
 mod reference;
+mod removing;
 mod wire;
 
 const PAGE: usize = 20;
@@ -120,15 +121,24 @@ impl Bindery {
     }
 
     async fn library_book(&self, reference: &Reference) -> Result<Option<Book>, Failure> {
+        Ok(self.library_books(reference).await?.into_iter().next())
+    }
+
+    async fn library_books(&self, reference: &Reference) -> Result<Vec<Book>, Failure> {
         let query = form_encoded(&[("search", reference.word(0)), ("limit", "100")]);
         let page: Page<Book> = self.read(&format!("{BOOKS}?{query}"), THE_BOOKS).await?;
         Ok(page
             .items
             .into_iter()
-            .find(|one| one.foreign_book_id == reference.id))
+            .filter(|one| one.foreign_book_id == reference.id)
+            .collect())
     }
 
     async fn library_author(&self, id: &str, name: &str) -> Result<Option<Author>, Failure> {
+        Ok(self.library_authors(id, name).await?.into_iter().next())
+    }
+
+    async fn library_authors(&self, id: &str, name: &str) -> Result<Vec<Author>, Failure> {
         let query = form_encoded(&[("search", name), ("limit", "100")]);
         let page: Page<Author> = self
             .read(&format!("{AUTHORS}?{query}"), THE_AUTHORS)
@@ -136,7 +146,8 @@ impl Bindery {
         Ok(page
             .items
             .into_iter()
-            .find(|one| one.foreign_author_id == id))
+            .filter(|one| one.foreign_author_id == id)
+            .collect())
     }
 
     async fn found_book(&self, reference: &Reference) -> Result<Option<Book>, Failure> {
@@ -317,6 +328,10 @@ impl BookCurating for Bindery {
 
     async fn request(&self, ask: &BookAsk) -> Result<Candidate, Failure> {
         asking::request(self, ask).await
+    }
+
+    async fn remove(&self, unit: BookUnit, reference: &str) -> Result<(), Failure> {
+        removing::remove(self, unit, reference).await
     }
 
     async fn profiles(&self) -> Result<AskedWith, Failure> {

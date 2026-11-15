@@ -160,6 +160,8 @@ async fn what_bindery_has_no_equivalent_for_is_answered_unsupported() {
     let key = a_key();
     for (operation, asked) in [
         ("search_upgrades", r#"{"kind":"tv"}"#),
+        ("search_upgrades", r#"{"kind":"books"}"#),
+        ("cutoff_unmet", r#"{"kind":"books"}"#),
         ("hardlinks", "{}"),
         ("set_hardlinks", r#"{"hardlink":true}"#),
         ("records", r#"{"sort":"series"}"#),

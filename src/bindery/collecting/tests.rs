@@ -731,3 +731,4 @@ async fn a_held_book_without_a_cover_of_its_own_is_shown_by_none() {
 }
 
 mod asking;
+mod removing;
