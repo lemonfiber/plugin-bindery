@@ -20,8 +20,7 @@ pub const UPSTREAM: &str = "Bindery";
 /// The Bindery release this adapter's recordings were taken from.
 pub const RELEASE: &str = "v1.43.1";
 
-/// The digest of the image that release's recordings were taken from.
-pub const DIGEST: &str = "sha256:27109c963f91a27f08d8825b406b2b5a5c59aed080bd9f3a7e585e235673d489";
+include!(concat!(env!("OUT_DIR"), "/fronted.rs"));
 
 /// What this adapter says it is: the contracts it speaks and the release it supports.
 #[must_use]
