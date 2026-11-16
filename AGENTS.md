@@ -43,8 +43,9 @@ it, and the conformance recordings under `conformance/` are the adapter's answer
 - **The core's crates move with the train.** The `rev` in `Cargo.toml` is the
   core commit `targets.toml` names, the same for every `lemonfiber-*` crate.
 - **Moving Bindery's digest** means recording every response again against the
-  new image in the same change, moving `RELEASE` and `DIGEST` in
-  `src/adapter.rs` with it, and committing the `proofs.json` the checks write.
+  new image in the same change, moving `RELEASE` in `src/adapter.rs` with it
+  (`build.rs` reads `DIGEST` from `plugin.toml`, the digest's one home), and
+  committing the `proofs.json` the checks write.
 
 ## Checks
 
