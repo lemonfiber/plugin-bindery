@@ -17,9 +17,6 @@ pub const API_KEY: &str = "api_key";
 /// The upstream this adapter fronts, as its project names itself.
 pub const UPSTREAM: &str = "Bindery";
 
-/// The Bindery release this adapter's recordings were taken from.
-pub const RELEASE: &str = "v1.43.1";
-
 include!(concat!(env!("OUT_DIR"), "/fronted.rs"));
 
 /// What this adapter says it is: the contracts it speaks and the release it supports.

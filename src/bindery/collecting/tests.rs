@@ -644,12 +644,12 @@ async fn the_profiles_are_the_root_folders_quality_profiles_and_units_it_answers
     let without = rules(vec![(
         Method::Get,
         "/system/status",
-        ok(r#"{"version":"v1.43.1","enhancedHardcoverApi":false}"#),
+        ok(r#"{"version":"v1.51.1","enhancedHardcoverApi":false}"#),
     )]);
     let with_hardcover = rules(vec![(
         Method::Get,
         "/system/status",
-        ok(r#"{"version":"v1.43.1","enhancedHardcoverApi":true}"#),
+        ok(r#"{"version":"v1.51.1","enhancedHardcoverApi":true}"#),
     )]);
 
     let with = bindery(&without).profiles().await.ok();

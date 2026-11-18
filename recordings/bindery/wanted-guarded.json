@@ -1,5 +1,5 @@
 {
-  "recorded_from": "ghcr.io/vavallee/bindery@sha256:27109c963f91a27f08d8825b406b2b5a5c59aed080bd9f3a7e585e235673d489",
+  "recorded_from": "ghcr.io/vavallee/bindery@sha256:c22516f3ebe69239c09021cc232765944737dfd1c5c77fa18a2213a87d65ddb9",
   "note": "The wanted list, asked for presenting nothing on an instance the adapter has claimed. A refusal is the pass: a curator holds every key the stack gave it and can be made to download anything.",
   "request": {"method": "GET", "path": "/api/v1/wanted/missing"},
   "response": {

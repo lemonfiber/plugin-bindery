@@ -31,13 +31,13 @@ fn keyed() -> Credential {
 async fn it_is_bindery_at_the_version_it_names() {
     let fake = Fake::always(Answer::reply(
         200,
-        r#"{"version":"v1.43.1","commit":"b0b8"}"#,
+        r#"{"version":"v1.51.1","commit":"b0b8"}"#,
     ));
     assert_eq!(
         bindery(&fake).identity().await.ok(),
         Some(Identity {
             name: "Bindery".to_owned(),
-            version: "v1.43.1".to_owned(),
+            version: "v1.51.1".to_owned(),
         })
     );
     assert_eq!(
