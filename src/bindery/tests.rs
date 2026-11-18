@@ -285,7 +285,7 @@ async fn a_bindery_nobody_has_set_up_is_open_and_one_set_up_is_ours_only_where_t
     let limited = Fake::in_turn(vec![Answer::reply(200, SET_UP), Answer::reply(429, "")]);
     assert!(matches!(
         bindery(&limited).owner().await,
-        Err(Failure::Refused { .. })
+        Err(Failure::Unavailable { .. })
     ));
     let unread = Fake::in_turn(vec![Answer::reply(200, "nope")]);
     assert!(matches!(

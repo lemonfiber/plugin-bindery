@@ -63,6 +63,10 @@ const NO_RECORDS: &str = "Bindery carries no records to or from another curator"
 
 const NO_MUSIC: &str = "Bindery files no music";
 
+const PINNED: u16 = 409;
+
+const PINNED_BY: &str = "Bindery keeps the download client while indexers are pinned to it:";
+
 const NOT_RECOUNTED: &str = "Bindery cannot post what it did to an address pinning its certificate, and this adapter does not read Bindery's history for the core";
 
 #[derive(Deserialize)]
@@ -92,6 +96,11 @@ pub(super) struct Folder {
 pub(super) struct Profile {
     pub(super) id: u32,
     pub(super) name: String,
+}
+
+#[derive(Deserialize)]
+struct Pinned {
+    indexers: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -176,6 +185,25 @@ impl Client for Bindery {
         let body = serde_json::json!({ field: value.unwrap_or_default() }).to_string();
         self.done(Method::Put, &format!("{CLIENTS}/{numeric}"), Some(body))
             .await
+    }
+
+    async fn forget_download_client(&self, id: &str) -> Result<(), Failure> {
+        let Ok(numeric) = self.assigned(id) else {
+            return Ok(());
+        };
+        let response = self
+            .endpoint
+            .send(&self.keyed(Method::Delete, &format!("{CLIENTS}/{numeric}"), None)?)
+            .await?;
+        if response.status != PINNED {
+            return self.endpoint.expect_success(&response);
+        }
+        match serde_json::from_str::<Pinned>(&response.body) {
+            Ok(pinned) => Err(self
+                .endpoint
+                .refused(&format!("{PINNED_BY} {}", pinned.indexers.join(", ")))),
+            Err(_) => Err(self.endpoint.refusal(&response)),
+        }
     }
 
     async fn test_download_clients(&self) -> Result<Vec<ClientProbe>, Failure> {
