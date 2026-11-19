@@ -16,10 +16,10 @@ path = "src/main.rs"
 [dependencies]
 async-trait = "0.1"
 base64 = "0.23"
-lemonfiber-adapter-kit = { git = "https://github.com/lemonfiber/lemonfiber", rev = "98bd419bed917ea8b3569dea33d7482bcd16eb7c" }
-lemonfiber-contract = { git = "https://github.com/lemonfiber/lemonfiber", rev = "98bd419bed917ea8b3569dea33d7482bcd16eb7c" }
-lemonfiber-manifest = { git = "https://github.com/lemonfiber/lemonfiber", rev = "98bd419bed917ea8b3569dea33d7482bcd16eb7c" }
-lemonfiber-ports = { git = "https://github.com/lemonfiber/lemonfiber", rev = "98bd419bed917ea8b3569dea33d7482bcd16eb7c" }
+lemonfiber-adapter-kit = { git = "https://github.com/lemonfiber/lemonfiber", rev = "870bee15aa79935e4ccb9fdffa60adb8df50638e" }
+lemonfiber-contract = { git = "https://github.com/lemonfiber/lemonfiber", rev = "870bee15aa79935e4ccb9fdffa60adb8df50638e" }
+lemonfiber-manifest = { git = "https://github.com/lemonfiber/lemonfiber", rev = "870bee15aa79935e4ccb9fdffa60adb8df50638e" }
+lemonfiber-ports = { git = "https://github.com/lemonfiber/lemonfiber", rev = "870bee15aa79935e4ccb9fdffa60adb8df50638e" }
 reqwest = { version = "0.13", default-features = false }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -32,8 +32,8 @@ toml = "1.1"
 [dev-dependencies]
 axum = { version = "0.8", default-features = false, features = ["http1", "tokio", "json"] }
 tower = { version = "0.5", default-features = false, features = ["util"] }
-lemonfiber-fixtures = { git = "https://github.com/lemonfiber/lemonfiber", rev = "98bd419bed917ea8b3569dea33d7482bcd16eb7c" }
-lemonfiber-plugin = { git = "https://github.com/lemonfiber/lemonfiber", rev = "98bd419bed917ea8b3569dea33d7482bcd16eb7c" }
+lemonfiber-fixtures = { git = "https://github.com/lemonfiber/lemonfiber", rev = "870bee15aa79935e4ccb9fdffa60adb8df50638e" }
+lemonfiber-plugin = { git = "https://github.com/lemonfiber/lemonfiber", rev = "870bee15aa79935e4ccb9fdffa60adb8df50638e" }
 toml = "1.1"
 
 [lints.rust]

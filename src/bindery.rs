@@ -2,6 +2,7 @@
 //! this adapter.
 
 use std::sync::Arc;
+use std::time::Duration;
 
 use lemonfiber_adapter_kit::credential::Holding;
 use lemonfiber_adapter_kit::endpoint::Endpoint;
@@ -109,6 +110,20 @@ impl Bindery {
         body: Option<String>,
     ) -> Result<Response, Failure> {
         self.endpoint.send(&self.keyed(method, path, body)?).await
+    }
+
+    async fn answered_within(
+        &self,
+        method: Method,
+        path: &str,
+        body: Option<String>,
+        within: Duration,
+    ) -> Result<Response, Failure> {
+        let request = Request {
+            deadline: Some(within),
+            ..self.keyed(method, path, body)?
+        };
+        self.endpoint.send(&request).await
     }
 
     async fn written<T: serde::de::DeserializeOwned>(
