@@ -163,6 +163,45 @@ async fn a_client_it_holds_is_written_again_whole_or_one_field_at_a_time() {
 }
 
 #[tokio::test]
+async fn a_client_is_forgotten_by_deleting_its_id_and_one_bindery_never_assigns_without_asking() {
+    let fake = Fake::always(Answer::reply(204, ""));
+    let curator = bindery(&fake);
+    for forgotten in ["7", "0", "../system"] {
+        assert!(
+            curator.forget_download_client(forgotten).await.is_ok(),
+            "{forgotten}"
+        );
+    }
+    assert_eq!(
+        asked(&fake)
+            .iter()
+            .map(|(method, path, _)| (*method, path.as_str()))
+            .collect::<Vec<_>>(),
+        [(Method::Delete, "/api/v1/downloadclient/7")]
+    );
+}
+
+#[tokio::test]
+async fn a_client_indexers_are_pinned_to_is_kept_and_the_refusal_names_them() {
+    let fake = Fake::always(Answer::reply(
+        409,
+        r#"{"error":"this download client is pinned by 2 indexer(s)","indexers":["Anna","Libgen"]}"#,
+    ));
+    assert!(matches!(
+        bindery(&fake).forget_download_client("7").await,
+        Err(Failure::Refused { detail, .. })
+            if detail == "Bindery keeps the download client while indexers are pinned to it: Anna, Libgen"
+    ));
+    let unread = Fake::always(Answer::reply(409, "pinned"));
+    assert!(matches!(
+        bindery(&unread).forget_download_client("7").await,
+        Err(Failure::Refused { .. })
+    ));
+    let refused = Fake::always(Answer::reply(500, ""));
+    assert!(bindery(&refused).forget_download_client("7").await.is_err());
+}
+
+#[tokio::test]
 async fn the_clients_it_holds_are_answered_by_where_they_are_reached_and_what_they_file_under() {
     let fake = Fake::always(Answer::reply(
         200,
