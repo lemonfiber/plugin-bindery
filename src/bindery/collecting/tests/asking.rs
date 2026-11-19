@@ -1,11 +1,13 @@
 use std::sync::Arc;
 
+use lemonfiber_contract::capabilities::books;
 use lemonfiber_fixtures::http::{Answer, Fake};
 use lemonfiber_ports::http::Method;
 use lemonfiber_ports::service::{BookAsk, BookCurating as _, BookUnit, CandidateState, Failure};
 use serde_json::json;
 
 use super::super::super::tests::bindery;
+use super::super::asking::ADDING_WITHIN;
 use super::{
     asking, dune, found_author, found_book, found_series, held_book, herbert, in_turn, ok, refused,
     rules, saga, sent, DUNE, HERBERT, SERIES,
@@ -92,6 +94,17 @@ async fn a_book_bindery_holds_none_of_is_added_alone_its_new_author_filed_as_ask
         [json!({ "rootFolderId": 1, "qualityProfileId": 2 })]
     );
     assert!(sent(&fake, Method::Put, "/api/v1/book/").is_empty());
+    assert_eq!(
+        fake.requests()
+            .iter()
+            .filter_map(|one| one.deadline.map(|deadline| (one.url.clone(), deadline)))
+            .collect::<Vec<_>>(),
+        [(
+            "http://bindery:8787/api/v1/author/book".to_owned(),
+            ADDING_WITHIN
+        )]
+    );
+    assert!(ADDING_WITHIN < books::REQUEST_DEADLINE);
 }
 
 #[tokio::test]

@@ -3,7 +3,9 @@
 //! author it adds; then searching where asked, and answering the candidate as it stands.
 
 use std::collections::BTreeSet;
+use std::time::Duration;
 
+use lemonfiber_contract::capabilities::books;
 use lemonfiber_ports::http::Method;
 use lemonfiber_ports::service::{BookAsk, BookCurating as _, BookUnit, Candidate, Failure};
 use serde::Deserialize;
@@ -17,6 +19,10 @@ use super::{
 };
 
 const ADD_BOOK: &str = "/author/book";
+
+const ANSWERED_BEFORE: Duration = Duration::from_secs(5);
+
+pub(super) const ADDING_WITHIN: Duration = books::REQUEST_DEADLINE.saturating_sub(ANSWERED_BEFORE);
 
 const SEARCH: &str = "search";
 
@@ -129,7 +135,12 @@ async fn added_book(
         "searchOnAdd": ask.search,
     });
     let response = bindery
-        .answered(Method::Post, ADD_BOOK, Some(body.to_string()))
+        .answered_within(
+            Method::Post,
+            ADD_BOOK,
+            Some(body.to_string()),
+            ADDING_WITHIN,
+        )
         .await?;
     let added: Option<Added> = serde_json::from_str(&response.body).ok();
     match (response.status, added) {
